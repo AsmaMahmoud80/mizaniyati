@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ميزانيتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222637;
+    --border: #2e3347;
+    --accent: #6c8ef5;
+    --accent2: #f5a623;
+    --green: #3dd68c;
+    --red: #f56c6c;
+    --text: #e8eaf6;
+    --text2: #8892b0;
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1d27 0%, #12152a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .header h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; }
+  .header h1 span { color: var(--accent); }
+  .month-nav { display: flex; align-items: center; gap: 12px; }
+  .month-nav button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .month-nav button:hover { background: var(--accent); border-color: var(--accent); }
+  .month-label { font-weight: 700; font-size: 1rem; min-width: 120px; text-align: center; }
+
+  /* Main Layout */
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Summary Cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: transform 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card-label { font-size: 0.78rem; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .card-value { font-size: 1.7rem; font-weight: 900; }
+  .card-value.income { color: var(--green); }
+  .card-value.expense { color: var(--red); }
+  .card-value.balance { color: var(--accent); }
+  .card-sub { font-size: 0.78rem; color: var(--text2); margin-top: 4px; }
+
+  /* Budget Bar */
+  .budget-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .budget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .budget-header h3 { font-size: 1rem; font-weight: 700; }
+  .budget-edit-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--text2); padding: 5px 12px;
+    border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 0.78rem; transition: all 0.2s;
+  }
+  .budget-edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .budget-bar-wrap { background: var(--surface2); border-radius: 999px; height: 10px; overflow: hidden; margin-bottom: 8px; }
+  .budget-bar { height: 100%; border-radius: 999px; transition: width 0.6s ease; background: var(--green); }
+  .budget-bar.warning { background: var(--accent2); }
+  .budget-bar.danger { background: var(--red); }
+  .budget-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text2); }
+
+  /* Main Content Grid */
+  .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+
+  /* Transactions */
+  .transactions-section { }
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .section-header h3 { font-size: 1rem; font-weight: 700; }
+  .add-btn {
+    background: var(--accent);
+    border: none; color: #fff;
+    padding: 8px 16px; border-radius: 10px;
+    cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .add-btn:hover { background: #5a7df0; transform: translateY(-1px); }
+
+  /* Filter tabs */
+  .filter-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab {
+    padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--border);
+    background: none; color: var(--text2);
+    cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 0.78rem; font-weight: 600; transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+  /* Transaction List */
+  .tx-list { display: flex; flex-direction: column; gap: 8px; }
+  .tx-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s; animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .tx-item:hover { border-color: var(--border); background: var(--surface2); }
+  .tx-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-name { font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-meta { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+  .tx-amount { font-weight: 900; font-size: 1rem; text-align: left; flex-shrink: 0; }
+  .tx-amount.pos { color: var(--green); }
+  .tx-amount.neg { color: var(--red); }
+  .tx-delete {
+    background: none; border: none; cursor: pointer;
+    color: var(--text2); font-size: 1rem; opacity: 0;
+    transition: all 0.2s; padding: 4px;
+  }
+  .tx-item:hover .tx-delete { opacity: 1; }
+  .tx-delete:hover { color: var(--red); }
+  .empty-state { text-align: center; padding: 40px; color: var(--text2); }
+  .empty-state .big { font-size: 2.5rem; margin-bottom: 8px; }
+
+  /* Side Panel */
+  .side-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  /* Category Breakdown */
+  .category-breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .category-breakdown h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+  .cat-item { margin-bottom: 14px; }
+  .cat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.82rem; }
+  .cat-name { display: flex; align-items: center; gap: 6px; }
+  .cat-bar-wrap { background: var(--surface2); border-radius: 999px; height: 6px; overflow: hidden; }
+  .cat-bar { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
+
+  /* Add Form Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%; max-width: 440px;
+    margin: 16px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal h3 { font-size: 1.1rem; font-weight: 900; margin-bottom: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 0.8rem; color: var(--text2); font-weight: 600; margin-bottom: 6px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 11px 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Cairo', sans-serif; font-size: 0.9rem;
+    transition: border-color 0.2s; direction: rtl;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .type-toggle { display: flex; gap: 8px; }
+  .type-btn {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: 1px solid var(--border); background: none;
+    color: var(--text2); cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 0.85rem;
+    font-weight: 700; transition: all 0.2s;
+  }
+  .type-btn.active.expense { background: rgba(245,108,108,0.15); border-color: var(--red); color: var(--red); }
+  .type-btn.active.income { background: rgba(61,214,140,0.15); border-color: var(--green); color: var(--green); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-primary {
+    flex: 1; padding: 12px; background: var(--accent);
+    border: none; border-radius: 10px; color: #fff;
+    font-family: 'Cairo', sans-serif; font-weight: 700;
+    font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #5a7df0; }
+  .btn-secondary {
+    padding: 12px 20px; background: none;
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text2); font-family: 'Cairo', sans-serif;
+    font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+  .emoji-btn {
+    width: 38px; height: 38px;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface2); cursor: pointer;
+    font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .emoji-btn:hover, .emoji-btn.selected { border-color: var(--accent); background: rgba(108,142,245,0.15); }
+
+  /* Budget Input Modal */
+  .budget-modal { max-width: 360px; }
+
+  /* Export */
+  .export-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text2); padding: 8px 16px;
+    border-radius: 10px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 0.8rem;
+    font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 700px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .summary-grid .card:last-child { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ميزانيتي <span>💰</span></h1>
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">›</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button onclick="changeMonth(1)">‹</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-label">الدخل</div>
+      <div class="card-value income" id="totalIncome">0 د.أ</div>
+      <div class="card-sub" id="incomeCount">0 معاملة</div>
+    </div>
+    <div class="card">
+      <div class="card-label">المصروفات</div>
+      <div class="card-value expense" id="totalExpense">0 د.أ</div>
+      <div class="card-sub" id="expenseCount">0 معاملة</div>
+    </div>
+    <div class="card">
+      <div class="card-label">الرصيد المتبقي</div>
+      <div class="card-value balance" id="totalBalance">0 د.أ</div>
+      <div class="card-sub" id="savingsRate">معدل التوفير: 0%</div>
+    </div>
+  </div>
+
+  <!-- Budget Bar -->
+  <div class="budget-section">
+    <div class="budget-header">
+      <h3>تقدم الميزانية الشهرية</h3>
+      <button class="budget-edit-btn" onclick="openBudgetModal()">✏️ تعديل الميزانية</button>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-bar" id="budgetBar" style="width:0%"></div>
+    </div>
+    <div class="budget-info">
+      <span id="budgetSpent">صرفت: 0 د.أ</span>
+      <span id="budgetPct">0%</span>
+      <span id="budgetTotal">الميزانية: غير محددة</span>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:0.85rem;color:var(--text2);font-weight:700">المتبقي من الميزانية</span>
+      <span id="budgetRemaining" style="font-size:1.1rem;font-weight:900">—</span>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Transactions -->
+    <div class="transactions-section">
+      <div class="section-header">
+        <h3>المعاملات</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="export-btn" onclick="exportJSON()">📤 نقل البيانات</button>
+          <button class="export-btn" onclick="document.getElementById('importFile').click()">📥 استيراد</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+          <button class="export-btn" onclick="exportCSV()">📊 CSV</button>
+          <button class="add-btn" onclick="openModal()">＋ إضافة</button>
+        </div>
+      </div>
+      <div class="filter-tabs">
+        <button class="tab active" onclick="filterTx('all', this)">الكل</button>
+        <button class="tab" onclick="filterTx('expense', this)">المصروفات</button>
+        <button class="tab" onclick="filterTx('income', this)">الدخل</button>
+      </div>
+      <div class="tx-list" id="txList"></div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="side-panel">
+      <div class="category-breakdown">
+        <h3>توزيع المصروفات</h3>
+        <div id="catBreakdown"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div class="modal-overlay" id="addModal" style="display:none" onclick="closeOnOverlay(event,'addModal')">
+  <div class="modal">
+    <h3>إضافة معاملة جديدة</h3>
+    <div class="form-group">
+      <label>النوع</label>
+      <div class="type-toggle">
+        <button class="type-btn active expense" id="typeExpense" onclick="setType('expense')">🔴 مصروف</button>
+        <button class="type-btn income" id="typeIncome" onclick="setType('income')">🟢 دخل</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>الوصف</label>
+      <input type="text" id="txDesc" placeholder="مثال: فاتورة كهرباء">
+    </div>
+    <div class="form-group">
+      <label>المبلغ (دينار)</label>
+      <input type="number" id="txAmount" placeholder="0.00" min="0" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>الفئة</label>
+      <select id="txCat" onchange="handleCatChange()">
+        <option value="🍽️ طعام">🍽️ طعام ومشروبات</option>
+        <option value="🚗 مواصلات">🚗 مواصلات</option>
+        <option value="🏥 صحة">🏥 صحة وعلاج</option>
+        <option value="🛒 تسوق">🛒 تسوق</option>
+        <option value="🏠 منزل">🏠 منزل وإيجار</option>
+        <option value="📚 تعليم">📚 تعليم</option>
+        <option value="🎉 ترفيه">🎉 ترفيه</option>
+        <option value="💄 عناية">💄 عناية شخصية</option>
+        <option value="💡 فواتير">💡 فواتير</option>
+        <option value="💼 راتب">💼 راتب</option>
+        <option value="📦 أخرى">📦 أخرى</option>
+        <option value="__new__">➕ إضافة فئة جديدة...</option>
+      </select>
+    </div>
+    <div class="form-group" id="newCatGroup" style="display:none">
+      <label>اسم الفئة الجديدة</label>
+      <input type="text" id="newCatName" placeholder="مثال: هدايا">
+      <div style="margin-top:8px;font-size:0.78rem;color:var(--text2)">اختاري رمزاً (إيموجي):</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px" id="emojiPicker">
+        <button type="button" class="emoji-btn" onclick="pickEmoji('🎁')">🎁</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('✈️')">✈️</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('🐾')">🐾</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('🧾')">🧾</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('🔧')">🔧</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('📱')">📱</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('👶')">👶</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('🕌')">🕌</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('⚽')">⚽</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('🎵')">🎵</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('💳')">💳</button>
+        <button type="button" class="emoji-btn" onclick="pickEmoji('🌱')">🌱</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>التاريخ</label>
+      <input type="date" id="txDate" max="">
+      <div id="dateError" style="color:var(--red);font-size:0.78rem;margin-top:4px;display:none"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('addModal')">إلغاء</button>
+      <button class="btn-primary" onclick="addTransaction()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Budget Modal -->
+<div class="modal-overlay" id="budgetModal" style="display:none" onclick="closeOnOverlay(event,'budgetModal')">
+  <div class="modal budget-modal">
+    <h3>تحديد ميزانية الشهر</h3>
+    <div class="form-group">
+      <label>الميزانية الشهرية (دينار)</label>
+      <input type="number" id="budgetInput" placeholder="مثال: 500" min="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('budgetModal')">إلغاء</button>
+      <button class="btn-primary" onclick="saveBudget()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const CAT_COLORS_BASE = {
+  '🍽️ طعام':'#f5a623','🚗 مواصلات':'#6c8ef5','🏥 صحة':'#3dd68c',
+  '🛒 تسوق':'#f56c6c','🏠 منزل':'#a78bfa','📚 تعليم':'#22d3ee',
+  '🎉 ترفيه':'#fb923c','💄 عناية':'#f472b6','💡 فواتير':'#facc15',
+  '💼 راتب':'#3dd68c','📦 أخرى':'#8892b0'
+};
+const EXTRA_COLORS = ['#e879f9','#34d399','#fb7185','#60a5fa','#fbbf24','#a3e635','#2dd4bf','#c084fc'];
+
+function getCustomCats() {
+  return JSON.parse(localStorage.getItem('customCategories') || '[]');
+}
+function saveCustomCats(cats) {
+  localStorage.setItem('customCategories', JSON.stringify(cats));
+}
+function getCatColors() {
+  const colors = { ...CAT_COLORS_BASE };
+  getCustomCats().forEach((c, i) => { colors[c.value] = c.color || EXTRA_COLORS[i % EXTRA_COLORS.length]; });
+  return colors;
+}
+let CAT_COLORS = getCatColors();
+
+let currentDate = new Date();
+let currentYear = currentDate.getFullYear();
+let currentMonth = currentDate.getMonth();
+let currentFilter = 'all';
+let currentType = 'expense';
+let selectedEmoji = '🎁';
+
+function getKey(year, month) { return `txData_${year}_${month}`; }
+function getBudgetKey(year, month) { return `budget_${year}_${month}`; }
+
+function getData() {
+  return JSON.parse(localStorage.getItem(getKey(currentYear, currentMonth)) || '[]');
+}
+function saveData(data) {
+  localStorage.setItem(getKey(currentYear, currentMonth), JSON.stringify(data));
+}
+function getBudget() {
+  return parseFloat(localStorage.getItem(getBudgetKey(currentYear, currentMonth)) || '0');
+}
+
+function fmt(n) { return n.toLocaleString('ar-JO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.أ'; }
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  render();
+}
+
+function render() {
+  document.getElementById('monthLabel').textContent = MONTHS_AR[currentMonth] + ' ' + currentYear;
+  const data = getData();
+  const income = data.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const expense = data.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const balance = income - expense;
+  const savRate = income > 0 ? Math.round((balance / income) * 100) : 0;
+
+  document.getElementById('totalIncome').textContent = fmt(income);
+  document.getElementById('totalExpense').textContent = fmt(expense);
+  document.getElementById('totalBalance').textContent = fmt(balance);
+  document.getElementById('totalBalance').style.color = balance >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('incomeCount').textContent = data.filter(t => t.type === 'income').length + ' معاملة';
+  document.getElementById('expenseCount').textContent = data.filter(t => t.type === 'expense').length + ' معاملة';
+  document.getElementById('savingsRate').textContent = 'معدل التوفير: ' + savRate + '%';
+
+  // Budget
+  const budget = getBudget();
+  const pct = budget > 0 ? Math.min(Math.round((expense / budget) * 100), 100) : 0;
+  const bar = document.getElementById('budgetBar');
+  bar.style.width = pct + '%';
+  bar.className = 'budget-bar' + (pct >= 100 ? ' danger' : pct >= 75 ? ' warning' : '');
+  document.getElementById('budgetSpent').textContent = 'صرفت: ' + fmt(expense);
+  document.getElementById('budgetPct').textContent = pct + '%';
+  document.getElementById('budgetTotal').textContent = budget > 0 ? 'الميزانية: ' + fmt(budget) : 'الميزانية: غير محددة';
+
+  const remainingEl = document.getElementById('budgetRemaining');
+  if (budget > 0) {
+    const remaining = budget - expense + income;
+    remainingEl.textContent = fmt(remaining) + ' د.أ';
+    remainingEl.style.color = remaining >= 0 ? 'var(--green)' : 'var(--red)';
+  } else {
+    remainingEl.textContent = 'حددي الميزانية أولاً';
+    remainingEl.style.color = 'var(--text2)';
+  }
+
+  renderTxList(data);
+  renderCategories(data);
+}
+
+function renderTxList(data) {
+  const list = document.getElementById('txList');
+  let filtered = data;
+  if (currentFilter !== 'all') filtered = data.filter(t => t.type === currentFilter);
+  filtered = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><div class="big">📭</div><div>لا توجد معاملات</div></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(t => {
+    const d = new Date(t.date);
+    const dateStr = d.toLocaleDateString('ar-JO', { day: 'numeric', month: 'short' });
+    const cat = t.category || '📦 أخرى';
+    const icon = cat.split(' ')[0] || '💳';
+    const catColor = CAT_COLORS[cat] || '#8892b0';
+    return `
+    <div class="tx-item">
+      <div class="tx-icon" style="background:${catColor}22;color:${catColor}">${icon}</div>
+      <div class="tx-info">
+        <div class="tx-name">${t.desc}</div>
+        <div class="tx-meta">${cat.split(' ').slice(1).join(' ')} · ${dateStr}</div>
+      </div>
+      <div class="tx-amount ${t.type === 'income' ? 'pos' : 'neg'}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}</div>
+      <button class="tx-delete" onclick="deleteTransaction('${t.id}')">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function renderCategories(data) {
+  const expenses = data.filter(t => t.type === 'expense');
+  const total = expenses.reduce((s, t) => s + t.amount, 0);
+  const cats = {};
+  expenses.forEach(t => { cats[t.category] = (cats[t.category] || 0) + t.amount; });
+  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+
+  const el = document.getElementById('catBreakdown');
+  if (!sorted.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:0.82rem;text-align:center;padding:20px">لا توجد مصروفات</div>';
+    return;
+  }
+  el.innerHTML = sorted.map(([cat, amt]) => {
+    const pct = total > 0 ? Math.round((amt / total) * 100) : 0;
+    const color = CAT_COLORS[cat] || '#8892b0';
+    return `
+    <div class="cat-item">
+      <div class="cat-row">
+        <div class="cat-name">${cat}</div>
+        <div style="font-weight:700;font-size:0.82rem">${pct}%</div>
+      </div>
+      <div class="cat-bar-wrap">
+        <div class="cat-bar" style="width:${pct}%;background:${color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterTx(type, el) {
+  currentFilter = type;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function fmtDateLocal(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function openModal() {
+  const first = fmtDateLocal(new Date(currentYear, currentMonth, 1));
+  const last = fmtDateLocal(new Date(currentYear, currentMonth + 1, 0));
+  const dateInput = document.getElementById('txDate');
+  dateInput.min = first;
+  dateInput.max = last;
+  const today = new Date();
+  if (today.getFullYear() === currentYear && today.getMonth() === currentMonth) {
+    dateInput.value = fmtDateLocal(today);
+  } else {
+    dateInput.value = first;
+  }
+  document.getElementById('dateError').style.display = 'none';
+  document.getElementById('txDesc').value = '';
+  document.getElementById('txAmount').value = '';
+  document.getElementById('newCatGroup').style.display = 'none';
+  document.getElementById('newCatName').value = '';
+  populateCategories();
+  setType('expense');
+  document.getElementById('addModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('txDesc').focus(), 100);
+}
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function closeOnOverlay(e, id) { if (e.target.classList.contains('modal-overlay')) closeModal(id); }
+
+const DEFAULT_OPTIONS = [
+  ['🍽️ طعام','🍽️ طعام ومشروبات'],['🚗 مواصلات','🚗 مواصلات'],['🏥 صحة','🏥 صحة وعلاج'],
+  ['🛒 تسوق','🛒 تسوق'],['🏠 منزل','🏠 منزل وإيجار'],['📚 تعليم','📚 تعليم'],
+  ['🎉 ترفيه','🎉 ترفيه'],['💄 عناية','💄 عناية شخصية'],['💡 فواتير','💡 فواتير'],
+  ['💼 راتب','💼 راتب'],['📦 أخرى','📦 أخرى']
+];
+
+function populateCategories() {
+  const sel = document.getElementById('txCat');
+  const customCats = getCustomCats();
+  let html = DEFAULT_OPTIONS.map(([v,l]) => `<option value="${v}">${l}</option>`).join('');
+  html += customCats.map(c => `<option value="${c.value}">${c.value} ${c.name}</option>`).join('');
+  html += `<option value="__new__">➕ إضافة فئة جديدة...</option>`;
+  sel.innerHTML = html;
+}
+
+function handleCatChange() {
+  const sel = document.getElementById('txCat');
+  const group = document.getElementById('newCatGroup');
+  if (sel.value === '__new__') {
+    group.style.display = 'block';
+    selectedEmoji = '🎁';
+    document.querySelectorAll('.emoji-btn').forEach((b,i) => b.classList.toggle('selected', i === 0));
+  } else {
+    group.style.display = 'none';
+  }
+}
+
+function pickEmoji(emoji) {
+  selectedEmoji = emoji;
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.toggle('selected', b.textContent.trim() === emoji));
+}
+
+function setType(type) {
+  currentType = type;
+  document.getElementById('typeExpense').className = 'type-btn' + (type === 'expense' ? ' active expense' : '');
+  document.getElementById('typeIncome').className = 'type-btn' + (type === 'income' ? ' active income' : '');
+  document.getElementById('newCatGroup').style.display = 'none';
+  const catSelect = document.getElementById('txCat');
+  if (type === 'income') {
+    catSelect.value = '💼 راتب';
+  } else {
+    catSelect.value = '🍽️ طعام';
+  }
+}
+
+function addTransaction() {
+  const desc = document.getElementById('txDesc').value.trim();
+  const amount = parseFloat(document.getElementById('txAmount').value);
+  let cat = document.getElementById('txCat').value;
+  const date = document.getElementById('txDate').value;
+  const dateErr = document.getElementById('dateError');
+  dateErr.style.display = 'none';
+
+  if (!desc || isNaN(amount) || amount <= 0 || !date) {
+    alert('يرجى ملء جميع الحقول بشكل صحيح');
+    return;
+  }
+
+  const d = new Date(date);
+  if (d.getFullYear() !== currentYear || d.getMonth() !== currentMonth) {
+    dateErr.textContent = `التاريخ يجب أن يكون داخل شهر ${MONTHS_AR[currentMonth]} ${currentYear}`;
+    dateErr.style.display = 'block';
+    return;
+  }
+
+  if (cat === '__new__') {
+    const newName = document.getElementById('newCatName').value.trim();
+    if (!newName) { alert('يرجى كتابة اسم الفئة الجديدة'); return; }
+    cat = `${selectedEmoji} ${newName}`;
+    const customCats = getCustomCats();
+    if (!customCats.find(c => c.value === cat)) {
+      customCats.push({ value: cat, name: newName, emoji: selectedEmoji, color: EXTRA_COLORS[customCats.length % EXTRA_COLORS.length] });
+      saveCustomCats(customCats);
+      CAT_COLORS = getCatColors();
+    }
+  }
+
+  const data = getData();
+  data.push({ id: Date.now().toString(), desc, amount, category: cat, date, type: currentType });
+  saveData(data);
+  closeModal('addModal');
+  render();
+}
+
+function deleteTransaction(id) {
+  if (!confirm('هل تريد حذف هذه المعاملة؟')) return;
+  const data = getData().filter(t => t.id !== id);
+  saveData(data);
+  render();
+}
+
+function openBudgetModal() {
+  document.getElementById('budgetInput').value = getBudget() || '';
+  document.getElementById('budgetModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('budgetInput').focus(), 100);
+}
+function saveBudget() {
+  const val = parseFloat(document.getElementById('budgetInput').value);
+  if (!isNaN(val) && val > 0) {
+    localStorage.setItem(getBudgetKey(currentYear, currentMonth), val);
+  }
+  closeModal('budgetModal');
+  render();
+}
+
+function exportJSON() {
+  // Gather ALL budget data + transactions + custom categories from localStorage
+  const exportData = { transactions: {}, budgets: {}, customCategories: getCustomCats(), exportedAt: new Date().toISOString() };
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('txData_')) {
+      exportData.transactions[key] = JSON.parse(localStorage.getItem(key));
+    } else if (key.startsWith('budget_')) {
+      exportData.budgets[key] = parseFloat(localStorage.getItem(key));
+    }
+  }
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ميزانيتي_نسخة_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const incoming = JSON.parse(e.target.result);
+      let txAdded = 0, txSkipped = 0;
+
+      // Merge transactions per month
+      for (const key in (incoming.transactions || {})) {
+        const incomingTxs = incoming.transactions[key];
+        const existingTxs = JSON.parse(localStorage.getItem(key) || '[]');
+        const existingIds = new Set(existingTxs.map(t => t.id));
+        const merged = [...existingTxs];
+        incomingTxs.forEach(t => {
+          if (existingIds.has(t.id)) { txSkipped++; }
+          else { merged.push(t); txAdded++; }
+        });
+        localStorage.setItem(key, JSON.stringify(merged));
+      }
+
+      // Merge budgets (only fill in if not already set)
+      for (const key in (incoming.budgets || {})) {
+        if (!localStorage.getItem(key) || parseFloat(localStorage.getItem(key)) === 0) {
+          localStorage.setItem(key, incoming.budgets[key]);
+        }
+      }
+
+      // Merge custom categories
+      if (incoming.customCategories && incoming.customCategories.length) {
+        const existing = getCustomCats();
+        const existingValues = new Set(existing.map(c => c.value));
+        incoming.customCategories.forEach(c => {
+          if (!existingValues.has(c.value)) existing.push(c);
+        });
+        saveCustomCats(existing);
+        CAT_COLORS = getCatColors();
+      }
+
+      alert(`تم الاستيراد بنجاح ✅\nمعاملات جديدة: ${txAdded}\nمعاملات مكررة (تم تجاهلها): ${txSkipped}`);
+      render();
+    } catch (err) {
+      alert('حدث خطأ: الملف غير صالح أو تالف');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function exportCSV() {
+  const data = getData();
+  if (!data.length) { alert('لا توجد بيانات للتصدير'); return; }
+  const header = 'التاريخ,الوصف,الفئة,النوع,المبلغ\n';
+  const rows = data.map(t =>
+    `${t.date},"${t.desc}","${t.category}",${t.type === 'income' ? 'دخل' : 'مصروف'},${t.amount}`
+  ).join('\n');
+  const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ميزانية_${MONTHS_AR[currentMonth]}_${currentYear}.csv`;
+  a.click();
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal('addModal');
+    closeModal('budgetModal');
+  }
+});
+
+render();
+</script>
+</body>
+</html>
